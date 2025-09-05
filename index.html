@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>viral video hub</title>
+    <style>
+        /* Base Styles & Font */
+        :root {
+            --bg-color: #87c3e5;
+            --container-bg-color: #f7f7f7;
+            --header-bg-color: #3498db;
+            --header-text-color: #ffffff;
+            --bubble-bg-color: #ffffff;
+            --text-color: #333333;
+            --link-color: #0056b3;
+            --meta-text-color: #8899a6;
+            --border-radius-large: 16px;
+            --border-radius-small: 8px;
+            --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+        }
+        
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Main Container for the Channel */
+        .telegram-container {
+            width: 100%;
+            max-width: 600px;
+            background-color: var(--container-bg-color);
+            border-radius: var(--border-radius-large);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #ddd;
+        }
+
+        /* Channel Header - Now Sticky */
+        /* এই কোডটুকু হেডারকে স্ক্রল করার সময় উপরের দিকে স্থির রাখবে */
+        .channel-header {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid #e0e0e0;
+            background-color: var(--header-bg-color);
+            color: var(--header-text-color);
+        }
+
+        .channel-profile-pic {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            object-fit: cover;
+            margin-right: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .channel-info-text h1 {
+            margin: 0;
+            font-size: 1.5em;
+            font-weight: 700;
+        }
+
+        .channel-info-text p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--header-text-color);
+        }
+
+        /* Message Area with Telegram-like Pattern */
+        .message-area {
+            padding: 10px 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle, #c0e0f5 1px, rgba(0, 0, 0, 0) 1px);
+            background-size: 15px 15px;
+            background-repeat: repeat;
+        }
+
+        /* Message Post Bubble */
+        .message-bubble {
+            background-color: var(--bubble-bg-color);
+            padding: 14px;
+            border-radius: 12px 12px 12px 4px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+            line-height: 1.5;
+        }
+
+        .message-text p {
+            margin: 0;
+            font-size: 0.9em;
+            color: var(--text-color);
+        }
+
+        .message-text a {
+            color: var(--link-color);
+            text-decoration: none;
+            font-weight: 500;
+            word-break: break-all;
+        }
+
+        .post-image {
+            width: 100%;
+            border-radius: var(--border-radius-small);
+            margin-top: 10px;
+            max-height: 400px;
+            object-fit: cover;
+        }
+        
+        .post-image-with-text {
+            border-radius: var(--border-radius-small);
+            margin-top: 10px;
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        /* Post Meta (Views, and Reactions) */
+        .post-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            font-size: 0.75em;
+            color: var(--meta-text-color);
+        }
+
+        .meta-line-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .meta-line-top .views::before {
+            content: "👁️";
+            margin-right: 4px;
+        }
+        
+        .reactions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+        }
+
+        .reaction-item {
+            display: flex;
+            align-items: center;
+            padding: 4px 8px;
+            background-color: #f0f0f0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            user-select: none;
+        }
+        
+        .reaction-item:hover {
+            background-color: #e0e0e0;
+        }
+
+        .reaction-item.reacted {
+            background-color: #b3d9ff;
+            transform: scale(1.05);
+        }
+
+        .reaction-item span {
+            margin-left: 4px;
+            font-size: 0.9em;
+        }
+        
+        .channel-name-post {
+            font-weight: bold;
+            font-size: 1em;
+            color: #444;
+            margin-bottom: 5px;
+        }
+        
+        /* New section for image URL */
+        .image-url-section {
+            padding: 10px;
+            border: 2px dashed #3498db;
+            border-radius: var(--border-radius-small);
+            background-color: #eaf6ff;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .image-url-section p {
+            font-size: 0.9em;
+            color: var(--link-color);
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        /* Links on a new line */
+        .link-container {
+            margin-top: 5px;
+        }
+        .link-container a {
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* For Blogger: Center the container on smaller screens */
+        @media (max-width: 600px) {
+            body {
+                padding: 0;
+            }
+            .telegram-container {
+                border-radius: 0;
+                box-shadow: none;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="telegram-container">
+
+        <!-- Channel Header -->
+        <div class="channel-header">
+            <img src="https://i.ibb.co.com/Q7BC9C5N/IMG-20250628-WA0041.jpg" alt="Profile Picture" class="channel-profile-pic">
+            <div class="channel-info-text">
+                <h1>viral video hub</h1>
+                <p>485.9k subscribers</p>
+            </div>
+        </div>
+
+        <!-- Message Area -->
+        <div class="message-area">
+
+            <!-- Post 1 (with specific image) -->
+            <div class="message-bubble" data-post-id="1">
+                <div class="message-text">
+                    <img src="https://i.ibb.co.com/CK6gbvzZ/Screenshot-20250815-173450-1.jpg" alt="Image from URL" class="post-image-with-text">
+
+                    <p>
+                        ছোট ভাইয়ের সাথে খেলাটা অস্থির ছিল 🥵 অনেক খোঁজাখুঁজির পর ভিডিও ও টা পেলাম🎬
+                    </p>
+                    <div class="link-container">
+                        <p>ফুল ভিডিও লিংক 👇</p>
+                        <a href="https://telegramxo.blogspot.com" target="_blank">https://telegramxo.blogspot.com</a>
+                        <p>উপরের লিং ব্যান হয়ে গেলে এখানে ক্লিক করুন 👇</p>
+                        <a href="https://ln.run/MXI5S" target="_blank">https://ln.run/MXI5S</a>
+                    </div>
+                </div>
+                <div class="post-meta">
+                    <div class="meta-line-top">
+                        <div class="reactions">
+                            <div class="reaction-item" data-reaction-emoji="😍">
+                                😍 <span class="reaction-count">415</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="🥵">
+                                🥵 <span class="reaction-count">240</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="😊">
+                                😊 <span class="reaction-count">810</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️">
+                                ❤️ <span class="reaction-count">515</span>
+                            </div>
+                             <div class="reaction-item" data-reaction-emoji="❤️‍🩹">
+                                ❤️‍🩹 <span class="reaction-count">565</span>
+                            </div>
+                        </div>
+                        <div class="meta-right">
+                            <span class="views">701k</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 2 (updated, without image) -->
+            <div class="message-bubble" data-post-id="2">
+                <div class="message-text">
+                    <p class="channel-name-post">
+                        Othoi আর পশা আপার ভিডিও 👇
+                    </p>
+                    <a href="https://t.me/russianvideo0_bot?startapp" target="_blank">https://t.me/russianvideo0_bot?startapp</a>
+                    <p class="channel-name-post" style="margin-top: 10px;">
+                        প্রিমিয়াম ভিডিও চ্যানেল 👇
+                    </p>
+                    <a href="https://t.me/+_r1FruEjUggwZDQ1" target="_blank">https://t.me/+_r1FruEjUggwZDQ1</a>
+                    <p class="channel-name-post" style="margin-top: 10px;">
+                        আমাদের সকল বট এর লিং 👇
+                    </p>
+                    <a href="https://t.me/khelahobe07_bot?startapp" target="_blank">https://t.me/khelahobe07_bot?startapp</a>
+                    <p class="channel-name-post" style="margin-top: 10px;">
+                        মেয়েদের ভিডিও কল গ্রুপ 👇
+                    </p>
+                    <a href="https://t.me/Khelahobe45_bot?startapp" target="_blank">https://t.me/Khelahobe45_bot?startapp</a>
+                    <p class="channel-name-post" style="margin-top: 10px;">
+                        বাচ্চাদের ভিডিও চ্যানেল 👇
+                    </p>
+                    <a href="https://t.me/viralvideo00_bot?startapp" target="_blank">https://t.me/viralvideo00_bot?startapp</a>
+                </div>
+                <div class="post-meta">
+                    <div class="meta-line-top">
+                        <div class="reactions">
+                            <div class="reaction-item" data-reaction-emoji="😍">
+                                😍 <span class="reaction-count">142</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="🥵">
+                                🥵 <span class="reaction-count">618</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="😊">
+                                😊 <span class="reaction-count">688</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️">
+                                ❤️ <span class="reaction-count">170</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️‍🩹">
+                                ❤️‍🩹 <span class="reaction-count">7</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="👍">
+                                👍 <span class="reaction-count">685</span>
+                            </div>
+                        </div>
+                        <div class="meta-right">
+                            <span class="views">904.3k</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 3 (updated with new image) -->
+            <div class="message-bubble" data-post-id="3">
+                <div class="message-text">
+                    <img src="https://i.ibb.co.com/MyTYzTqj/img-1756044631942.jpg" alt="Othoi and Posha Apa" class="post-image">
+
+                    <p>
+                        অনেক খোঁজাখুঁজির পর ভিডিওগুলো পেলাম 👇
+                    </p>
+                    <div class="link-container">
+                        <p>সকল ভিডিও এই ওয়েবসাইটে 👇</p>
+                        <a href="https://telegramxo.blogspot.com" target="_blank">https://telegramxo.blogspot.com</a>
+                        <p>ভিডিও দেখার জন্য অবশ্যই আগে এই vpn কানেক্ট করুন 👇</p>
+                        <a href="https://rebrand.ly/229712" target="_blank">https://rebrand.ly/229712</a>
+                    </div>
+                </div>
+                <div class="post-meta">
+                    <div class="meta-line-top">
+                        <div class="reactions">
+                            <div class="reaction-item" data-reaction-emoji="😍">
+                                😍 <span class="reaction-count">205</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="🥵">
+                                🥵 <span class="reaction-count">258</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="😊">
+                                😊 <span class="reaction-count">160</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️">
+                                ❤️ <span class="reaction-count">140</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️‍🩹">
+                                ❤️‍🩹 <span class="reaction-count">789</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="🫠">
+                                🫠 <span class="reaction-count">156</span>
+                            </div>
+                        </div>
+                        <div class="meta-right">
+                            <span class="views">707.4k</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Post 4 (from Screenshot_20250815-161207.jpg, part 1) -->
+            <div class="message-bubble" data-post-id="4">
+                <div class="message-text">
+                    <p class="channel-name-post">
+                        প্রিমিয়াম ভিডিও চ্যানেল
+                    </p>
+                    <p>ভাই বোনের অস্থির বিডিও লিংক 👇</p>
+                    <a href="https://undergrounddressedposition.com/vc1xew7t?key=9a97915b9241db71d8f53e974a75a975" target="_blank">https://www.revenuecpmgate.com/hbfh3tsx?key=69d41201781e1eef842f24d3158e6b9c</a>
+                    <p>পরিমনির ৭:৩০ সেকেন্ডের অস্থির ভিডিও লিংক 👇</p>
+                    <a href="https://t.co/TUUXQ5Sk3j" target="_blank">https://t.co/TUUXQ5Sk3j</a>
+                    <p>🥵 হিডেন কলেজের ভাইরাল ভিডিও ফুল ভিডিও লিংক 👇</p>
+                    <a href="https://t.co/VNUrpU5YV5" target="_blank">https://t.co/VNUrpU5YV5</a>
+                    <p>🥵 রাত্রির ভাইরাল ২২ মিনিটের ফুল ভিডিও 👇</p>
+                    <a href="https://t.co/sDwXBkZpvL" target="_blank">https://t.co/sDwXBkZpvL</a>
+                    <p>🥵 ফেসবুকের ভাইরাল ভিডিও। ফুল ভিডিও 👇</p>
+                    <a href="https://t.co/5nG01BQsR8" target="_blank">https://t.co/5nG01BQsR8</a>
+                </div>
+                <div class="post-meta">
+                    <div class="meta-line-top">
+                        <div class="reactions">
+                            <div class="reaction-item" data-reaction-emoji="😍">
+                                😍 <span class="reaction-count">876</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="🥵">
+                                🥵 <span class="reaction-count">195</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="😊">
+                                😊 <span class="reaction-count">157</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️">
+                                ❤️ <span class="reaction-count">250</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️‍🩹">
+                                ❤️‍🩹 <span class="reaction-count">446</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="🫠">
+                                🫠 <span class="reaction-count">689</span>
+                            </div>
+                        </div>
+                        <div class="meta-right">
+                            <span class="views">857.9k</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Final post from user's instructions -->
+            <div class="message-bubble" data-post-id="5">
+                <div class="message-text">
+                    <p>
+                        যারা কোন টাকা খরচ করা ছাড়া অনলাইন থেকে প্রতিদিন ৩০০ টাকার উপরে ইনকাম করতে চান তারা নিচে এই সাইটটিতে কাজ করতে পারেন আমি কয়েকবার টাকা উত্তোলন করেছি 👇
+                    </p>
+                    <a href="https://t.me/+KQ_IVDNpf3JkZDZl" target="_blank">https://t.me/+KQ_IVDNpf3JkZDZl</a>
+                </div>
+                <div class="post-meta">
+                    <div class="meta-line-top">
+                        <div class="reactions">
+                            <div class="reaction-item" data-reaction-emoji="🔥">
+                                🔥 <span class="reaction-count">203</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="💰">
+                                💰 <span class="reaction-count">102</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="😍">
+                                😍 <span class="reaction-count">855</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="🥵">
+                                🥵 <span class="reaction-count">733</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="😊">
+                                😊 <span class="reaction-count">558</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️">
+                                ❤️ <span class="reaction-count">369</span>
+                            </div>
+                            <div class="reaction-item" data-reaction-emoji="❤️‍🩹">
+                                ❤️‍🩹 <span class="reaction-count">100</span>
+                            </div>
+                        </div>
+                        <div class="meta-right">
+                            <span class="views">562k</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+    
+    <script>
+        // Reaction Logic
+        const userReactions = {};
+        const reactionItems = document.querySelectorAll('.reaction-item');
+
+        reactionItems.forEach(item => {
+            item.addEventListener
